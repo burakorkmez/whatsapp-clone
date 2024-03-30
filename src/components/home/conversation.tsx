@@ -2,14 +2,16 @@ import { formatDate } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { MessageSeenSvg } from "@/lib/svgs";
 import { ImageIcon, Users, VideoIcon } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 const Conversation = ({ conversation }: { conversation: any }) => {
-	const conversationImage = conversation.groupImage;
-	const conversationName = conversation.groupName || "Private Chat";
+	const conversationImage = conversation.groupImage || conversation.image;
+	const conversationName = conversation.groupName || conversation.name;
 	const lastMessage = conversation.lastMessage;
 	const lastMessageType = lastMessage?.messageType;
+	const me = useQuery(api.users.getMe);
 	//
-	const authUser = { _id: "user1" };
 
 	return (
 		<>
@@ -31,7 +33,7 @@ const Conversation = ({ conversation }: { conversation: any }) => {
 						</span>
 					</div>
 					<p className='text-[12px] mt-1 text-gray-500 flex items-center gap-1 '>
-						{lastMessage?.sender === authUser?._id ? <MessageSeenSvg /> : ""}
+						{lastMessage?.sender === me?._id ? <MessageSeenSvg /> : ""}
 						{conversation.isGroup && <Users size={16} />}
 						{!lastMessage && "Say Hi!"}
 						{lastMessageType === "text" ? (
