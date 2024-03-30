@@ -103,4 +103,26 @@ export const getMe = query({
 	},
 });
 
-// TODO: add getGroupMembers query -- later
+export const getGroupMembers = query({
+	args: { conversationId: v.id("conversations") },
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+
+		if (!identity) {
+			throw new ConvexError("Unauthorized");
+		}
+
+		const conversation = await ctx.db
+			.query("conversations")
+			.filter((q) => q.eq(q.field("_id"), args.conversationId))
+			.first();
+		if (!conversation) {
+			throw new ConvexError("Conversation not found");
+		}
+
+		const users = await ctx.db.query("users").collect();
+		const groupMembers = users.filter((user) => conversation.participants.includes(user._id));
+
+		return groupMembers;
+	},
+});
